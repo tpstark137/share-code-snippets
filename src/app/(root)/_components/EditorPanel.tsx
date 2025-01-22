@@ -14,15 +14,16 @@ import ShareSnippetDialog from "./ShareSnippetDialog";
 function EditorPanel() {
   const clerk = useClerk();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const { language, theme, fontSize, editor, setFontSize, setEditor } = useCodeEditorStore();
+  const { language, theme, fontSize, editor, setFontSize, setEditor } =
+    useCodeEditorStore();
 
   const mounted = useMounted();
 
-  useEffect(() => {
-    const savedCode = localStorage.getItem(`editor-code-${language}`);
-    const newCode = savedCode || LANGUAGE_CONFIG[language].defaultCode;
-    if (editor) editor.setValue(newCode);
-  }, [language, editor]);
+  // useEffect(() => {
+  //   const savedCode = localStorage.getItem(`editor-code-${language}`);
+  //   //const newCode = savedCode || LANGUAGE_CONFIG[language].defaultCode;
+  //   //if (editor) editor.setValue(newCode);
+  // }, [language, editor]);
 
   useEffect(() => {
     const savedFontSize = localStorage.getItem("editor-font-size");
@@ -54,11 +55,18 @@ function EditorPanel() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#1e1e2e] ring-1 ring-white/5">
-              <Image src={"/" + language + ".png"} alt="Logo" width={24} height={24} />
+              <Image
+                src={"/" + language + ".png"}
+                alt="Logo"
+                width={24}
+                height={24}
+              />
             </div>
             <div>
               <h2 className="text-sm font-medium text-white">Code Editor</h2>
-              <p className="text-xs text-gray-500">Write and execute your code</p>
+              <p className="text-xs text-gray-500">
+                Write and execute your code
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -71,7 +79,9 @@ function EditorPanel() {
                   min="12"
                   max="24"
                   value={fontSize}
-                  onChange={(e) => handleFontSizeChange(parseInt(e.target.value))}
+                  onChange={(e) =>
+                    handleFontSizeChange(parseInt(e.target.value))
+                  }
                   className="w-20 h-1 bg-gray-600 rounded-lg cursor-pointer"
                 />
                 <span className="text-sm font-medium text-gray-400 min-w-[2rem] text-center">
@@ -141,7 +151,9 @@ function EditorPanel() {
           {!clerk.loaded && <EditorPanelSkeleton />}
         </div>
       </div>
-      {isShareDialogOpen && <ShareSnippetDialog onClose={() => setIsShareDialogOpen(false)} />}
+      {isShareDialogOpen && (
+        <ShareSnippetDialog onClose={() => setIsShareDialogOpen(false)} />
+      )}
     </div>
   );
 }
