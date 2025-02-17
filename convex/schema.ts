@@ -29,7 +29,7 @@ export default defineSchema({
   }).index("by_user_id", ["userId"]),
 
   snippetComments: defineTable({
-    snippetId: v.id("snippets"),
+    snippetId: v.id("snippets"), //this will going to be the type of snippets
     userId: v.string(),
     userName: v.string(),
     content: v.string(), // This will store HTML content
@@ -38,7 +38,7 @@ export default defineSchema({
   stars: defineTable({
     userId: v.string(),
     snippetId: v.id("snippets"),
-  })
+  }) //we will get stars by these indexes
     .index("by_user_id", ["userId"])
     .index("by_snippet_id", ["snippetId"])
     .index("by_user_id_and_snippet_id", ["userId", "snippetId"]),

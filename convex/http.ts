@@ -91,6 +91,7 @@ http.route({
       const name = `${first_name || ""} ${last_name || ""}`.trim();
 
       try {
+        //save user to db
         await ctx.runMutation(api.users.syncUser, {
           userId: id,
           email,

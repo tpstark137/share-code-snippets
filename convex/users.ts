@@ -12,13 +12,14 @@ export const syncUser = mutation({
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.userId))
       .first();
-
+       //if user already created
     if (!existingUser) {
+      //if user not exist, create it
       await ctx.db.insert("users", {
         userId: args.userId,
         email: args.email,
         name: args.name,
-        isPro: false,
+        isPro: false, //default
       });
     }
   },

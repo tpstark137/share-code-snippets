@@ -1,4 +1,5 @@
 "use client";
+
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import { useEffect, useState } from "react";
 import { defineMonacoThemes, LANGUAGE_CONFIG } from "../_constants";
@@ -16,34 +17,38 @@ function EditorPanel() {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const { language, theme, fontSize, editor, setFontSize, setEditor } =
     useCodeEditorStore();
-
   const mounted = useMounted();
 
-  // useEffect(() => {
-  //   const savedCode = localStorage.getItem(`editor-code-${language}`);
-  //   //const newCode = savedCode || LANGUAGE_CONFIG[language].defaultCode;
-  //   //if (editor) editor.setValue(newCode);
-  // }, [language, editor]);
+  // Load initial code based on selected language
+  useEffect(() => {
+    const savedCode = localStorage.getItem(`editor-code-${language}`);
+    const defaultCode = LANGUAGE_CONFIG[language]?.defaultCode || "";
+    if (editor) editor.setValue(savedCode || defaultCode);
+  }, [language, editor]);
 
+  // Load font size from localStorage
   useEffect(() => {
     const savedFontSize = localStorage.getItem("editor-font-size");
-    if (savedFontSize) setFontSize(parseInt(savedFontSize));
+    if (savedFontSize) setFontSize(parseInt(savedFontSize, 10));
   }, [setFontSize]);
 
+  // Reset editor to default code
   const handleRefresh = () => {
-    const defaultCode = LANGUAGE_CONFIG[language].defaultCode;
+    const defaultCode = LANGUAGE_CONFIG[language]?.defaultCode || "";
     if (editor) editor.setValue(defaultCode);
     localStorage.removeItem(`editor-code-${language}`);
   };
 
+  // Save editor changes to localStorage
   const handleEditorChange = (value: string | undefined) => {
     if (value) localStorage.setItem(`editor-code-${language}`, value);
   };
 
+  // Adjust font size within allowed range
   const handleFontSizeChange = (newSize: number) => {
-    const size = Math.min(Math.max(newSize, 12), 24);
-    setFontSize(size);
-    localStorage.setItem("editor-font-size", size.toString());
+    const clampedSize = Math.min(Math.max(newSize, 12), 24);
+    setFontSize(clampedSize);
+    localStorage.setItem("editor-font-size", clampedSize.toString());
   };
 
   if (!mounted) return null;
@@ -56,8 +61,8 @@ function EditorPanel() {
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#1e1e2e] ring-1 ring-white/5">
               <Image
-                src={"/" + language + ".png"}
-                alt="Logo"
+                src={`/${language}.png`}
+                alt={`${language} logo`}
                 width={24}
                 height={24}
               />
@@ -80,9 +85,10 @@ function EditorPanel() {
                   max="24"
                   value={fontSize}
                   onChange={(e) =>
-                    handleFontSizeChange(parseInt(e.target.value))
+                    handleFontSizeChange(parseInt(e.target.value, 10))
                   }
                   className="w-20 h-1 bg-gray-600 rounded-lg cursor-pointer"
+                  aria-label="Adjust font size"
                 />
                 <span className="text-sm font-medium text-gray-400 min-w-[2rem] text-center">
                   {fontSize}
@@ -90,6 +96,7 @@ function EditorPanel() {
               </div>
             </div>
 
+            {/* Reset Button */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -106,24 +113,27 @@ function EditorPanel() {
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsShareDialogOpen(true)}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg overflow-hidden bg-gradient-to-r
-               from-blue-500 to-blue-600 opacity-90 hover:opacity-100 transition-opacity"
+                from-blue-500 to-blue-600 opacity-90 hover:opacity-100 transition-opacity"
+              aria-label="Share code snippet"
             >
               <ShareIcon className="size-4 text-white" />
-              <span className="text-sm font-medium text-white ">Share</span>
+              <span className="text-sm font-medium text-white">Share</span>
             </motion.button>
           </div>
         </div>
 
-        {/* Editor  */}
+        {/* Editor */}
         <div className="relative group rounded-xl overflow-hidden ring-1 ring-white/[0.05]">
           {clerk.loaded && (
             <Editor
               height="600px"
-              language={LANGUAGE_CONFIG[language].monacoLanguage}
+              language={
+                LANGUAGE_CONFIG[language]?.monacoLanguage || "javascript"
+              }
               onChange={handleEditorChange}
               theme={theme}
               beforeMount={defineMonacoThemes}
-              onMount={(editor) => setEditor(editor)}
+              onMount={(editorInstance) => setEditor(editorInstance)}
               options={{
                 minimap: { enabled: false },
                 fontSize,
@@ -147,14 +157,16 @@ function EditorPanel() {
               }}
             />
           )}
-
           {!clerk.loaded && <EditorPanelSkeleton />}
         </div>
       </div>
+
+      {/* Share Dialog */}
       {isShareDialogOpen && (
         <ShareSnippetDialog onClose={() => setIsShareDialogOpen(false)} />
       )}
     </div>
   );
 }
+
 export default EditorPanel;
